@@ -69,7 +69,6 @@ const Table = () => {
       });
 
       if (response.status === 200) {
-        console.log(response.data);
         localStorage.setItem('cjwt', response.data.cjwt); // Store JWT in localStorage
         setCJwt(response.data.cjwt); // Store the JWT in state
       }
@@ -141,7 +140,6 @@ const Table = () => {
             Authorization: `Bearer ${accessToken}`,
           },
         });
-        console.log('Search Response:', response.data); // Log the response data
         return response.data.tracks.items; // Return search results
       } catch (error) {
         console.error('Error searching for songs:', error);
