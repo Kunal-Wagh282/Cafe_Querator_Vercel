@@ -12,10 +12,7 @@ const Outh = () => {
 
   const clientID = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
   const clientSecret = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET;
-  const redirectUri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI;
-
-
-  
+  const redirectUri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI;  
     useEffect(() => {
         const query = new URLSearchParams(window.location.search);
         const authorizationCode = query.get('code');
