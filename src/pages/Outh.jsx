@@ -7,52 +7,13 @@ import Preloader from '../components/Prealoader';
 
 const Outh = () => {
 // State variables
-  // Authentication and Tokens
-  const [accessToken, setAccessToken] = useState("");
-  const [refreshToken, setRefreshToken] = useState('');
   const [jwt, setJwt] = useState(localStorage.getItem("jwt"));
-
-  // Player and Track Info
-  const [currentTrack, setCurrentTrack] = useState(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
-  const [trackName, setTrackName] = useState('');
-  const [artistName, setArtistName] = useState('');
-  const [player, setPlayer] = useState(null);
-  //const [deviceId, setDeviceId] = useState(null);
-  const [uri, setUri] = useState('');
-  const [trackId, setTrackid] = useState(""); // For search input
-  const [songName, setSongname] = useState(""); // For search input
-  const [track_artist_name, setTrack_Artist_Name] = useState(""); // For search input
-  const [track_img_url, setTrack_Image_Url] = useState(""); // For search input
   const navigate = useNavigate();
-
-
-
-
-  // Search and Suggestions
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
-  const [suggestions, setSuggestions] = useState([]);
-  const [playlistQuery, setPlaylistQuery] = useState("");
-  const [playlistSuggestions, setPlaylistSuggestions] = useState([]);
-
-  // Playlist Management
-  const [selectedPlaylist, setSelectedPlaylist] = useState(null);
-  const [selectedplaylistID, setSelectedPlaylistID] = useState(null);
-  const [queue, setQueue] = useState([]);
-  const [isButtonDisabled, setIsButtonDisabled] = useState(false);// starting song when login is done !!
-
-  // Cafe/Feature Info
-  const [cafeInfo, setCafeInfo] = useState(null);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [features, setSongFeatures] = useState([]);
 
   const clientID = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
   const clientSecret = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET;
   const redirectUri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI;
 
-  const [loading, setLoading] = useState(true);
 
   
     useEffect(() => {

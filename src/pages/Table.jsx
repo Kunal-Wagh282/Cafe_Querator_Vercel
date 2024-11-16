@@ -6,6 +6,9 @@ import CONFIG from '../config'; // Import the API URL
 import Navbar from '../components/Navbar'; // Import the Navbar component
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';  // Import Toastify CSS
+import Preloader from '../components/Prealoader';
+
+
 const Table = () => {
   const { cafename, tableid } = useParams(); // Extracts :cafename and :tableid from URL  
   const [cjwt, setCJwt] = useState('');
@@ -20,7 +23,13 @@ const Table = () => {
   // Use URLSearchParams to parse the query string
   const searchParams = new URLSearchParams(location.search);
   const cafeid = searchParams.get('id'); // Extract `code` query param
-
+  const [loading, setLoading] = useState(true);
+  console.log(clientID)
+    useEffect(() => {
+      setTimeout(() => {
+        setLoading(false); // Simulate data loading or some async operation
+      }, 3000); // The preloader will display for 3 seconds
+    }, []);
 
   useEffect(() => {
     // Fetch JWT token once the component mounts
@@ -227,6 +236,9 @@ const Table = () => {
 
   return (
     <div className="table-container">
+      {loading ? (
+        <Preloader /> // Show the preloader
+      ) : (<></>)}
     <Navbar cafeName={cafename}/>
       {/* Search Bar */}
       
