@@ -21,7 +21,6 @@ const Outh = () => {
           exchangeAuthorizationCode(authorizationCode)
             .then(({ accessToken, refreshToken, expiresAt }) => {
               //setAccessToken(accessToken); // Set access token
-              console.log(accessToken, refreshToken, expiresAt)
               return sendTokenToBackend(accessToken, refreshToken, expiresAt);
             })
             .then(() => {

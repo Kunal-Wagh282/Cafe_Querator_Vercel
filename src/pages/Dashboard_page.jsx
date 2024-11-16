@@ -78,6 +78,10 @@ const Dashboard = () => {
     }
   }, [totalTables]);
 
+  
+
+
+
   const playNextSong = async () => {
     try {
       // Fetch the next track from the API
@@ -188,6 +192,8 @@ const Dashboard = () => {
               }, resumeTimeoutDelay);
           }
       });
+
+      
       
         spotifyPlayer.connect();
         setPlayer(spotifyPlayer);

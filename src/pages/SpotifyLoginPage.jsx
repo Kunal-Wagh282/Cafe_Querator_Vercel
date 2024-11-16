@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const CLIENT_ID = "44c18fde03114e6db92a1d4deafd6a43"; // Your Spotify client ID
+const CLIENT_ID = import.meta.env.VITE_SPOTIFY_CLIENT_ID; // Your Spotify client ID
 
 const SpotifyLoginPage = () => {
   const REDIRECT_URI = import.meta.env.VITE_SPOTIFY_REDIRECT_URI; // Redirect URI after Spotify login
