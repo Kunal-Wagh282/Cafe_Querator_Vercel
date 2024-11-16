@@ -213,7 +213,6 @@ const Dashboard = () => {
           }
       });
       
-  
         spotifyPlayer.connect();
         setPlayer(spotifyPlayer);
       };
