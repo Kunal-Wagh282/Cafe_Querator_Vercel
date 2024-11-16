@@ -24,7 +24,7 @@ const Table = () => {
   const searchParams = new URLSearchParams(location.search);
   const cafeid = searchParams.get('id'); // Extract `code` query param
   const [loading, setLoading] = useState(true);
-  console.log(clientID)
+  
     useEffect(() => {
       setTimeout(() => {
         setLoading(false); // Simulate data loading or some async operation
