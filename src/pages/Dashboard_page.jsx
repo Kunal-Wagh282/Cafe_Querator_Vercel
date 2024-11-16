@@ -51,13 +51,12 @@ const Dashboard = () => {
 
   // Routing and Navigation
   const navigate = useNavigate();
+  const clientID = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
+  const clientSecret = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET;
 
   // Miscellaneous
-  const clientID = '44c18fde03114e6db92a1d4deafd6a43';
-  const clientSecret = '645c1dfc9c7a4bf88f7245ea5d90b454';
-  // const redirectUri = 'https://cafe-querator.vercel.app/outh';
   const [loading, setLoading] = useState(true);
-
+console.log(clientID)
   useEffect(() => {
     setTimeout(() => {
       setLoading(false); // Simulate data loading or some async operation

@@ -48,11 +48,9 @@ const Outh = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [features, setSongFeatures] = useState([]);
 
-  const clientID = '44c18fde03114e6db92a1d4deafd6a43';
-  const clientSecret = '645c1dfc9c7a4bf88f7245ea5d90b454';
-  const redirectUri = 'https://cafe-querator.vercel.app/outh';
-    
-
+  const clientID = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
+  const clientSecret = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET;
+  const redirectUri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI;
 
   const [loading, setLoading] = useState(true);
 
