@@ -27,9 +27,6 @@ const Dashboard = () => {
   const [track_artist_name, setTrack_Artist_Name] = useState(""); // For search input
   const [track_img_url, setTrack_Image_Url] = useState(""); // For search input
 
-
-
-
   // Search and Suggestions
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
