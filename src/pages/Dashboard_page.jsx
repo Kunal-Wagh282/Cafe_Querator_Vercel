@@ -764,8 +764,6 @@ const playSong = async (track_id) => {
             
           </div>
         </div>
-
-            
     </div>
 
   );
