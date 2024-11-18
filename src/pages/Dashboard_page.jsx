@@ -136,70 +136,70 @@ const Dashboard = () => {
   };
   
   // Player event listener
-  // useEffect(() => {
-  //   if (accessToken) {
-  //     const script = document.createElement("script");
-  //     script.src = "https://sdk.scdn.co/spotify-player.js";
-  //     script.async = true;
-  //     document.body.appendChild(script);
+  useEffect(() => {
+    if (accessToken) {
+      const script = document.createElement("script");
+      script.src = "https://sdk.scdn.co/spotify-player.js";
+      script.async = true;
+      document.body.appendChild(script);
   
-  //     window.onSpotifyWebPlaybackSDKReady = () => {
-  //       const spotifyPlayer = new window.Spotify.Player({
-  //         name: `Spotify Web Player of cafe ${cafeInfo?.Cafe_Name || "Unknown Cafe"}`,
-  //         getOAuthToken: cb => { cb(accessToken); },
-  //         volume: 1
-  //       });
+      window.onSpotifyWebPlaybackSDKReady = () => {
+        const spotifyPlayer = new window.Spotify.Player({
+          name: `Spotify Web Player of cafe ${cafeInfo?.Cafe_Name || "Unknown Cafe"}`,
+          getOAuthToken: cb => { cb(accessToken); },
+          volume: 1
+        });
   
-  //       spotifyPlayer.addListener('ready', ({ device_id }) => {
-  //         console.log('Ready with Device ID', device_id);
-  //         //setDeviceId(device_id);
-  //         localStorage.setItem("device_id",device_id)
-  //       });
+        spotifyPlayer.addListener('ready', ({ device_id }) => {
+          console.log('Ready with Device ID', device_id);
+          //setDeviceId(device_id);
+          localStorage.setItem("device_id",device_id)
+        });
   
-  //       spotifyPlayer.addListener('player_state_changed', state => {
-  //         if (state) {
-  //             setTrackName(state.track_window.current_track.name);
-  //             setArtistName(
-  //                 state.track_window.current_track.artists.map(artist => artist.name).join(', ')
-  //             );
-  //             setIsPaused(state.paused);
+        spotifyPlayer.addListener('player_state_changed', state => {
+          if (state) {
+              setTrackName(state.track_window.current_track.name);
+              setArtistName(
+                  state.track_window.current_track.artists.map(artist => artist.name).join(', ')
+              );
+              setIsPaused(state.paused);
       
-  //             const endTimeoutDelay = state.duration - state.position - 5000; // Pause before 5 seconds of song ends
-  //             const waitDelay = 5 * 1000; // Wait 5 seconds before skipping
-  //             const resumeTimeoutDelay = endTimeoutDelay + waitDelay;
+              const endTimeoutDelay = state.duration - state.position - 5000; // Pause before 5 seconds of song ends
+              const waitDelay = 5 * 1000; // Wait 5 seconds before skipping
+              const resumeTimeoutDelay = endTimeoutDelay + waitDelay;
       
-  //             // Clear existing timeouts if they exist
-  //             if (window.spotifyTimeout1) {
-  //                 clearTimeout(window.spotifyTimeout1);
-  //             }
-  //             if (window.spotifyTimeout2) {
-  //                 clearTimeout(window.spotifyTimeout2);
-  //             }
+              // Clear existing timeouts if they exist
+              if (window.spotifyTimeout1) {
+                  clearTimeout(window.spotifyTimeout1);
+              }
+              if (window.spotifyTimeout2) {
+                  clearTimeout(window.spotifyTimeout2);
+              }
       
-  //             // Set a timeout to pause the song 5 seconds before it ends
-  //             window.spotifyTimeout1 = setTimeout(() => {
-  //                 console.log('Song Ended');
-  //                 window.spotify_player && window.spotify_player.pause();
-  //                 console.log('Waiting 5 Seconds...');
-  //                 // Call playNextSong after the song has ended and 5 seconds have passed
-  //                 playNextSong();
-  //             }, endTimeoutDelay);
+              // Set a timeout to pause the song 5 seconds before it ends
+              window.spotifyTimeout1 = setTimeout(() => {
+                  console.log('Song Ended');
+                  window.spotify_player && window.spotify_player.pause();
+                  console.log('Waiting 5 Seconds...');
+                  // Call playNextSong after the song has ended and 5 seconds have passed
+                  playNextSong();
+              }, endTimeoutDelay);
       
-  //             // Set a timeout to skip the song after waiting 5 seconds
-  //             window.spotifyTimeout2 = setTimeout(() => {
-  //                 console.log('Resuming Song...');
-  //                 window.spotify_player && window.spotify_player.nextTrack();
-  //             }, resumeTimeoutDelay);
-  //         }
-  //     });
+              // Set a timeout to skip the song after waiting 5 seconds
+              window.spotifyTimeout2 = setTimeout(() => {
+                  console.log('Resuming Song...');
+                  window.spotify_player && window.spotify_player.nextTrack();
+              }, resumeTimeoutDelay);
+          }
+      });
 
       
       
-  //       spotifyPlayer.connect();
-  //       setPlayer(spotifyPlayer);
-  //     };
-  //   }
-  // }, [accessToken]);
+        spotifyPlayer.connect();
+        setPlayer(spotifyPlayer);
+      };
+    }
+  }, [accessToken]);
   
 
   useEffect(() => {
