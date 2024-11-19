@@ -247,7 +247,7 @@ const Table = () => {
               },
             }
           );
-          console.log(response)
+          //console.log(response)
           if (response.status === 200) {
             fetchQueue(); // Refresh queue
             setSearchQuery('');
@@ -258,7 +258,12 @@ const Table = () => {
           }
         }
       } catch (error) {
+        if(error.response.data.error === "unauthorized"){
+          notify("error","Unauthorized, Scan QR again!!")
+        }
+        else{
         console.error('Error adding song:', error);
+        }
       }
     };
     
