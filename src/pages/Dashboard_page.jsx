@@ -116,7 +116,7 @@ const Dashboard = () => {
         }
         if (event.data.startsWith('Table') && event.data.includes('Turned On')) {
           const tableNumber = event.data.split(' ')[1];  // Extract table number
-          notify('info',`Table ${tableNumber} status on!`)
+          notify('info',`Table ${tableNumber} status on!!`)
           updateTables();  // Update the specific table
         }
       };
