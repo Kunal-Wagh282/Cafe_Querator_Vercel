@@ -4,6 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import '../styles/Dashboard.css'; // Add your styles here
 import CONFIG from '../config'; // Import the API URL
 import Preloader from '../components/Prealoader';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlay, faPause, faForward ,faBackward} from "@fortawesome/free-solid-svg-icons";
+import tableImage from '../images/table.png';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';  // Import Toastify CSS
+
 
 const Dashboard = () => {
   // State variables
@@ -31,6 +37,7 @@ const Dashboard = () => {
   // table number const
   const [totalTables, setTotalTables ]= useState("") ; // You can change this value dynamically if needed
   const [rows, setRows ]= useState([]) ; // You can change this value dynamically if needed
+  const [tableColors, setTableColors] = useState({});
 
 
   // Search and Suggestions
@@ -53,6 +60,9 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const clientID = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
   const clientSecret = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET;
+  //Socket
+  const [socket, setSocket] = useState(null);
+
 
   // Miscellaneous
   const [loading, setLoading] = useState(true);
@@ -78,6 +88,64 @@ const Dashboard = () => {
     }
   }, [totalTables]);
 
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      const jwt = localStorage.getItem('jwt'); // Retrieve JWT token from localStorage
+      // console.log('JWT Token:', jwt);
+
+      if (!jwt) {
+        console.error('JWT token not found!');
+        return; // Handle this case accordingly (e.g., redirect to login)
+      }
+
+      const ws = new WebSocket(`wss://cafequerator-backend.onrender.com/ws/queue/?jwt=${jwt}`);
+
+      ws.onopen = () => {
+        console.log('WebSocket connection established');
+      };
+
+      ws.onmessage = (event) => {
+        //const data = JSON.parse(event.data);
+        console.log(event.data)
+        if (event.data === 'queue updated') {
+          fetchQueue();
+        }
+        if (event.data === 'current track updated') {
+          //fetchQueue();
+        }
+        if(event.data === 'Table Status updated')
+        {
+          updateTables();
+        }
+      };
+
+      ws.onclose = (event) => {
+        console.warn('WebSocket connection closed:', event);
+      };
+
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        console.log('Retrying connection...');
+        setTimeout(() => {
+          const newWs = new WebSocket(`wss://cafequerator-backend.onrender.com/ws/queue/?jwt=${jwt}`);
+          setSocket(newWs);
+        }, 5000); // Retry after 5 seconds
+      };
+
+      setSocket(ws);
+
+      // Cleanup on component unmount
+      return () => {
+        ws.close();
+      };
+    }, 3000); // Delay of 5 seconds
+
+    // Cleanup the timeout if the component unmounts before the timeout completes
+    return () => clearTimeout(timeoutId);
+  }, []);
+
+
   
 
 
@@ -88,10 +156,10 @@ const Dashboard = () => {
       const response = await axios.get(`${CONFIG.QUEUE_URL}/next-track`, {
         headers: {
           "Authorization": `Bearer ${jwt}`, // Pass the access token if required
-          "Content-Type": "application/json"
-        },
+        }
       });
-  
+
+
       if (response.status === 200 && response.data.Next_track) 
       {
         const data = response.data.Next_track;
@@ -103,7 +171,6 @@ const Dashboard = () => {
         setTrack_Artist_Name(data.track_artist_name);
         setTrack_Image_Url(data.track_img_url);
   
-         
         // Play the next track
         playSong(data.track_id); // Call your existing playSong function
 
@@ -130,8 +197,8 @@ const Dashboard = () => {
         console.log("No next track available.");
       }
     } catch (error) {
-      console.error("Error fetching the next track:", error);
-      alert("No Songs in the Queue!")
+      console.log(error);
+      //alert("No Songs in the Queue!")
     }
   };
   
@@ -312,13 +379,21 @@ const Dashboard = () => {
         },
       });
       console.log(response.data)
-      const { cafe_info ,token_info } = response.data;
+      const { cafe_info ,token_info ,table_status } = response.data;
       localStorage.setItem("refresh_token",token_info.refresh_token);
       setAccessToken(token_info.access_token);
       setCafeInfo(cafe_info);
       setRefreshToken(token_info.refresh_token);
       setExpiresAt(token_info.expires_at);
       setTotalTables(cafe_info.No_of_Tables)
+
+      if (table_status && Array.isArray(table_status)) {
+        const initialColors = table_status.reduce((acc, table) => {
+          acc[table.table_number] = table.table_status ? 'green' : 'red';
+          return acc;
+        }, {});
+        setTableColors(initialColors);   
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -400,10 +475,6 @@ const playSong = async (track_id) => {
     return null; // Return null on error
   }
 };
-
-
-
-
 
 
 
@@ -594,7 +665,7 @@ const playSong = async (track_id) => {
   
   };
 
-
+// --------------------------------------------------------main section code for the table functionality------------------------------------------------------------
         // Function to generate table rows dynamically
         const generateTableRows = (numberOfTables) => {
           const tables = Array.from({ length: numberOfTables }, (_, index) => index + 1);
@@ -608,6 +679,117 @@ const playSong = async (track_id) => {
           return rows;
         };
 
+
+        const updateTables = async () => {
+          try {
+            const response = await axios.get(`${CONFIG.API_URL}/tablestatus`, {
+              headers: {
+                Authorization: `Bearer ${jwt}`, // Replace with actual JWT
+              },
+            });
+        
+            // Assuming the API response contains an object like:
+            // { table_status: { 1: "green", 2: "red", 3: "green", ... } }
+            const { table_status } = response.data;
+        
+            if (table_status) {
+                const initialColors = table_status.reduce((acc, table) => {
+                  acc[table.table_number] = table.table_status ? 'green' : 'red';
+                  return acc;
+                }, {});
+                setTableColors(initialColors);   
+              
+              console.log('Table statuses updated');
+            } else {
+              console.error('API response does not contain table_status:', response.data);
+            }
+          } catch (error) {
+            console.error('Error while fetching table statuses:', error);
+          }
+        };
+        
+
+
+        // function to give clickable event of the table
+          
+          // API call
+          const handleTableClick = async (table) => {
+            console.log(`Table ${table} clicked!`);
+            
+            setTableColors((prevColors) => {
+              if (prevColors[table] === 'green') {
+                return { ...prevColors, [table]: 'red' }; // Optimistically update to red
+              }
+              console.log("Table is already red, no API call will be made.");
+              return prevColors; // No update if already red
+            });
+          
+            // Access the current state directly for accurate logic
+            if (tableColors[table] === 'green') {
+              try {
+                const response = await axios.post(
+                  `${CONFIG.QUEUE_URL}/remove-table`,
+                  {
+                    table_no: table,
+                  },
+                  {
+                    headers: {
+                      Authorization: `Bearer ${jwt}`, // Replace with actual JWT
+                    },
+                  }
+                );
+                console.log('API response:', response.data);
+                notify('success',`Table ${table} status off!`)
+
+              } catch (error) {
+                console.error('Error during API call:', error);
+          
+                // Rollback the optimistic update in case of API failure
+                setTableColors((prevColors) => ({
+                  ...prevColors,
+                  [table]: 'green',
+                }));
+              }
+            }
+          };
+          
+        
+
+          // ----------------------------------------------------------------song progress bar---------------------------------------------------------------------------
+
+
+
+          const notify = (type, message) => {
+            const config = {
+              position: "top-center", // Positioning the toast
+              autoClose: 5000,        // Auto-close after 5 seconds
+              hideProgressBar: false, // Show progress bar
+              closeOnClick: true,     // Close on click
+              pauseOnHover: true,     // Pause when hovered
+              draggable: true,        // Allow dragging
+              progress: undefined,    // No custom progress bar
+            };
+          
+            switch (type) {
+              case "success":
+                toast.success(message, config);
+                break;
+              case "error":
+                toast.error(message, config);
+                break;
+              case "info":
+                toast.info(message, config);
+                break;
+              case "warning":
+                toast.warning(message, config);
+                break;
+              default:
+                toast(message, config); // Default toast type
+                break;
+            }
+          };
+
+
   // Render the component
   return (
     
@@ -616,10 +798,15 @@ const playSong = async (track_id) => {
         <Preloader /> // Show the preloader
       ) : (<></>)}
       <header className="dashboard-header">
-        <h1>Welcome {cafeInfo ? cafeInfo.Cafe_Name : 'Cafe'} to Cafe-Qurator</h1>
-        <p><br /><br  /><br/>Let's change the vibe today!</p>
-        <button className="logout-btn" onClick={handleLogout}>Logout</button>
+        <div className="heading">
+            <h1>Welcome {cafeInfo ? cafeInfo.Cafe_Name : 'Cafe'} to Cafe-Qurator</h1>
+            Let's change the vibe today!
+        </div>
+        <div className='Logout'>
+            <button className="logout-btn" onClick={handleLogout}>Logout</button>
+        </div>
       </header>
+      <ToastContainer />
 
       <div className="dashboard-content">
         <div className="sidebar">
@@ -661,21 +848,48 @@ const playSong = async (track_id) => {
                 </div>
               )}
         </div>
-       
-        <div className="main-section">
-          <div className="table-status">
-            {/* Render the rows of tables */}
-            {rows.map((row, rowIndex) => (
-              <div key={rowIndex} className="table-row">
-                {row.map((table) => (
-                  <div key={table} className="table-square">
-                    {table}
-                  </div>
-                ))}
-              </div>
-            ))}
+      
+       {/* --------------------------this is the main section code----------------------------- */}
+          <div className="main-section">
+            <div className="table-heading">
+              <h1>Table</h1>
+            </div>
+            <div className="table-status">
+              {rows.map((row, rowIndex) => (
+                <div key={rowIndex} className="table-row">
+                  {row.map((table) => (
+                    <div
+                      key={table}
+                      className="table-square"
+                      onClick={() => handleTableClick(table)}
+                      role="button"
+                      tabIndex={0}
+                      style={{
+                        cursor: 'pointer',
+                        backgroundColor: tableColors[table] || 'red', // Default to red
+                        width: '49px',
+                        height: '49px',
+                        display: 'flex',
+                        margin: '25px',
+                        textAlign: 'center',
+                        lineHeight: '50px',
+                        color: 'black',
+                        fontWeight: 'bold',
+                        postion:'relative'
+                      }}>
+                      
+                    <div className='indi-table'>
+                      {table}
+                    </div>  
+                      <img src={tableImage} alt="Cafe Illustration" class="Image"/>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        
+
 
         <div className="queue-section">
           <h2>Queue</h2>
@@ -687,7 +901,7 @@ const playSong = async (track_id) => {
                 value={searchQuery}
                 onChange={handleSearchInputChange}
               />
-              <button type="submit">Add & Play</button>
+              <button type="submit">Add to Queue</button>
             </form> 
 
             {suggestions.length > 0 && (
@@ -713,52 +927,60 @@ const playSong = async (track_id) => {
           </div>
           <div>
           <h1>Ongoing Queue</h1>
-        </div>
-        
-        {/* Queue Section */}
-          <div className="queue">
-            <ul className="queue-list">
-              {queue.length > 0 ? (
-                queue.map((track, index) => (
-                  <li key={index} className="queue-item">
-                    {/* Display song image dynamically */}
-                    <img 
-                      src={track.track_img_url || 'https://placeholder.com/150'} // Use dynamic image URL
-                      alt={track.track_name}
-                      className="track-image"
-                    />
-                    <div className="track-info">
-                      {/* Display song name dynamically */}
-                      <span className="track-name">{track.track_name}</span>
-                      {/* Display artist name dynamically */}
-                      <span className="artist-name">{track.track_artist_name}</span>
-                    </div>
-                  </li>
-                ))
-              ) : (
-                <p className="no-songs">No songs in the queue</p>
-              )}
-            </ul>
           </div>
-
-        </div>
+        
+          {/* Queue Section */}
+            <div className="queue">
+              <ul className="queue-list">
+                {queue.length > 0 ? (
+                  queue.map((track, index) => (
+                    <li key={index} className="queue-item">
+                      {/* Display song image dynamically */}
+                      <img 
+                        src={track.track_img_url || 'https://placeholder.com/150'} // Use dynamic image URL
+                        alt={track.track_name}
+                        className="track-image"
+                      />
+                      <div className="track-info">
+                        {/* Display song name dynamically */}
+                        <span className="track-name">{track.track_name}</span>
+                        {/* Display artist name dynamically */}
+                        <span className="artist-name">{track.track_artist_name}</span>
+                      </div>
+                    </li>
+                  ))
+                ) : (
+                  <p className="no-songs">No songs in the queue</p>
+                )}
+              </ul>
+            </div>
+          </div>
       </div>
 
 
       {/* Current Song Section */}
-        <div className="current-song-section">
-          <h3>Now Playing</h3>
-          <div className="current-song-info">
+        <div className="current-song-sectiond">
+          <div className="current-heading">
+            <h3>Now Playing  :</h3>
+          </div>
+          <div className="current-song-infoo">
             {/* Display the album art dynamically */}
-            <img src={track_img_url || 'https://placeholder.com/150'} alt="Album Art" />
+            <div className="song-image">
+              {/* image of the song or album */}
+              <img src={track_img_url || 'https://placeholder.com/150'} alt="Album Art" />
+            </div>
             <div className="current-song-details">
               {/* Display the current song name dynamically */}
               <p className="song-title">{songName || 'Song Title'}</p>
               {/* Display the artist name dynamically */}
-              <p className="artist-name">{track_artist_name || 'Artist Name'}</p>
-              <button onClick={handlePlayPause}>{isPaused ? 'Play' : 'Pause'}</button>
-              <button onClick={playNextSong}>Next Song PLay</button>
-
+              <p className="artist-name">{track_artist_name || 'Artist Name'}</p> 
+            </div>
+            <div className="current-song-buttons">
+              <button ><FontAwesomeIcon icon={faBackward} /></button>
+              <button onClick={handlePlayPause}>{isPaused ? (<FontAwesomeIcon icon={faPlay} />) : (<FontAwesomeIcon icon={faPause} />)}</button>
+              <button onClick={playNextSong}><FontAwesomeIcon icon={faForward} /></button>
+            </div>
+            <div className="music-progress-bar">
               
             </div>
             
