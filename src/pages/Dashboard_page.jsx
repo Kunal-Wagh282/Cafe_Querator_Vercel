@@ -114,9 +114,10 @@ const Dashboard = () => {
         if (event.data === 'current track updated') {
           //fetchQueue();
         }
-        if(event.data === 'Table Status updated')
-        {
-          updateTables();
+        if (event.data.startsWith('Table') && event.data.includes('Turned On')) {
+          const tableNumber = event.data.split(' ')[1];  // Extract table number
+          notify('info',`Table ${tableNumber} status on!`)
+          updateTables();  // Update the specific table
         }
       };
 
@@ -714,7 +715,7 @@ const playSong = async (track_id) => {
           
           // API call
           const handleTableClick = async (table) => {
-            console.log(`Table ${table} clicked!`);
+            //console.log(`Table ${table} clicked!`);
             
             setTableColors((prevColors) => {
               if (prevColors[table] === 'green') {
