@@ -233,8 +233,7 @@ const Table = () => {
           const selectedTrack = results[0];
           setSongname(selectedTrack.name);
           setTrackid(selectedTrack.id);
-          const response = await axios.post(
-            `${CONFIG.QUEUE_URL}/add-track`,
+          const response = await axios.post(`${CONFIG.QUEUE_URL}/add-track`,
             {
               track_name: selectedTrack.name,
               track_id: selectedTrack.id,
@@ -248,10 +247,14 @@ const Table = () => {
               },
             }
           );
+          console.log(response)
           if (response.status === 200) {
             fetchQueue(); // Refresh queue
             setSearchQuery('');
             notify("success","Your Song Is Added!!");
+          }
+          if (response.status === 226) {
+            notify("info","Song Already in Queue!!");
           }
         }
       } catch (error) {

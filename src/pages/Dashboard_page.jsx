@@ -740,6 +740,7 @@ const playSong = async (track_id) => {
                 );
                 console.log('API response:', response.data);
                 notify('success',`Table ${table} status off!`)
+                fetchQueue();
 
               } catch (error) {
                 console.error('Error during API call:', error);
@@ -946,6 +947,8 @@ const playSong = async (track_id) => {
                         <span className="track-name">{track.track_name}</span>
                         {/* Display artist name dynamically */}
                         <span className="artist-name">{track.track_artist_name}</span>
+                        <br></br>
+                        <span className="">(Table{track.id})</span>
                       </div>
                     </li>
                   ))
