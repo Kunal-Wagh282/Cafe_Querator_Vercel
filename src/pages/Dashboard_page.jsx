@@ -164,7 +164,7 @@ const Dashboard = () => {
       if (response.status === 200 && response.data.Next_track) 
       {
         const data = response.data.Next_track;
-        console.log(data.track_id);
+        //console.log(data.track_id);
   
         // Update the state with the next track details
         setSongname(data.track_name);
@@ -883,7 +883,7 @@ const playSong = async (track_id) => {
                     <div className='indi-table'>
                       {table}
                     </div>  
-                      <img src={tableImage} alt="Cafe Illustration" class="Image"/>
+                      <img src={tableImage} alt="Cafe Illustration" className="Image"/>
                     </div>
                   ))}
                 </div>
