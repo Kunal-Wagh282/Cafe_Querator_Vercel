@@ -199,7 +199,7 @@ const Dashboard = () => {
       }
     } catch (error) {
       console.log(error);
-      //alert("No Songs in the Queue!")
+      notify("warning","No Songs in Queue!")
     }
   };
   
@@ -487,13 +487,12 @@ const playSong = async (track_id) => {
       if (results.length > 0) {
         const selectedTrack = results[0]; // Assuming the first result is what the user meant
         
-        console.log(selectedTrack);
+        //console.log(selectedTrack);
         // Fetch the song features
         //const features = await fetchSongFeatures(trackId);
         //playSong(selectedTrack.id);
         try {
-          const response = await axios.post(
-            `${CONFIG.QUEUE_URL}/add-track`,
+          const response = await axios.post(`${CONFIG.QUEUE_URL}/add-track`,
             {
               track_name: selectedTrack.name,
               track_id: selectedTrack.id,
@@ -510,6 +509,9 @@ const playSong = async (track_id) => {
           if (response.status === 200) {
             fetchQueue(); // Refresh queue
             setSearchQuery('');
+          }
+          if (response.status === 226) {
+            notify("info","Song Already in Queue!!");
           }
         } catch (error) {
           console.error('Error adding song:', error);
