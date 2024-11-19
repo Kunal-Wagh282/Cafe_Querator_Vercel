@@ -487,7 +487,7 @@ const playSong = async (track_id) => {
       if (results.length > 0) {
         const selectedTrack = results[0]; // Assuming the first result is what the user meant
         
-
+        console.log(selectedTrack);
         // Fetch the song features
         //const features = await fetchSongFeatures(trackId);
         //playSong(selectedTrack.id);
@@ -949,7 +949,7 @@ const playSong = async (track_id) => {
                         {/* Display artist name dynamically */}
                         <span className="artist-name">{track.track_artist_name}</span>
                         <br></br>
-                        <span className="">(Table{track.id})</span>
+                        <span className="">({track.id === 0 ? 'Table Admin' : `Table ${track.id}`})</span>
                       </div>
                     </li>
                   ))
