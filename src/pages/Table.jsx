@@ -260,6 +260,12 @@ const Table = () => {
       } catch (error) {
         if(error.response.data.error === "unauthorized"){
           notify("error","Unauthorized, Scan QR again!!")
+          return
+        }
+        if(error.response.data.message === "Vibe not match"){
+          console.log(error)
+          notify("error","Vibe does not match, try another song!!")
+          return
         }
         else{
         console.error('Error adding song:', error);
@@ -346,7 +352,8 @@ const Table = () => {
   <h2 className="queue-header">Ongoing Queue</h2>
   <ul className="queue-list">
     {queue.length > 0 ? (
-      queue.map((track, index) => (
+      queue.filter(track => track.id !== -1) // Filter out tracks with id -1
+      .map((track, index) => (
         <li key={index} className="queue-item">
           {/* Display song image dynamically */}
           <img 
