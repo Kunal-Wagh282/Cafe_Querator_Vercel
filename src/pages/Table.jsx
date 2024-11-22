@@ -8,6 +8,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';  // Import Toastify CSS
 import Preloader from '../components/Prealoader';
 import ConfirmationModal from '../components/ConfirmationModal';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 
 const Table = () => {
@@ -19,6 +20,9 @@ const Table = () => {
   const [suggestions, setSuggestions] = useState([]); // To hold live suggestions
   const [searchResults, setSearchResults] = useState([]); // To store search results
   const [songName, setSongname] = useState(""); // For search input
+  const [requestedSongName, setRequestedSongName] = useState(""); // For search input
+
+  
   const [track_artist_name, setTrack_Artist_Name] = useState(""); // For search input
   const [track_img_url, setTrack_Image_Url] = useState("https://placeholder.com/150"); // For search input
   const [trackId, setTrackid] = useState(""); // For search input
@@ -44,8 +48,8 @@ const Table = () => {
     setJwtToken()
     .then(() => {
       fetchToken()
-      .then((token) => {
-        updateCurrentSong(token)
+      .then(() => {
+        updateCurrentSong()
       })
     }) // Call the token fetch function
   }, [tableid]); // Re-run if cafeId changes
@@ -82,7 +86,7 @@ const Table = () => {
           fetchQueue();
         }
         if (event.data === 'current track updated') {
-          updateCurrentSong(accessToken);
+          updateCurrentSong();
           console.log("Change song")
         }
         
@@ -113,7 +117,8 @@ const Table = () => {
     return () => clearTimeout(timeoutId);
   }, []);
 
-  const updateCurrentSong = async (token) => {
+  const updateCurrentSong = async () => {
+    const token = localStorage.getItem("access_token")
     try {
       const response = await axios.get(`${CONFIG.QUEUE_URL}/current-track`, {
         headers: {
@@ -145,6 +150,7 @@ const Table = () => {
       });
       if(response.status === 200){
       setAccessToken(response.data.access_token);
+      localStorage.setItem("access_token",response.data.access_token)
       return response.data.access_token
       console.log("Access Token Set!")
       }
@@ -243,8 +249,7 @@ const Table = () => {
         const results = await searchSongs(searchQuery,accessToken);
         if (results.length > 0) {
           const selectedTrack = results[0];
-          setSongname(selectedTrack.name);
-          setTrackid(selectedTrack.id);
+          setRequestedSongName(selectedTrack.name);
           const response = await axios.post(`${CONFIG.QUEUE_URL}/add-track`,
             {
               track_name: selectedTrack.name,
@@ -327,8 +332,8 @@ const Table = () => {
     };
   
     const handleRequest = () => {
-      console.log('Song requested to the admin!',songName); // Your logic here
-      sendMessage(`Song requested ${songName}`)
+      console.log('Song requested to the admin!',requestedSongName); // Your logic here
+      sendMessage(`Song requested ${requestedSongName}`)
       closeModal();
     };
     
@@ -391,7 +396,7 @@ const Table = () => {
         onClose={closeModal}
         onConfirm={handleRequest}
         title="Request Song"
-        message={`Do you want to request ${songName} song to the admin?`}
+        message={`Do you want to request ${requestedSongName} song to the admin?`}
       />
       ) : (
       null
@@ -399,41 +404,50 @@ const Table = () => {
 
 {/* Queue Section */}
 <div className="queue">
-  <h2 className="queue-header">Ongoing Queue</h2>
-  <ul className="queue-list">
-    {queue.length > 0 ? (
-      queue.filter(track => track.id !== -1) // Filter out tracks with id -1
-      .map((track, index) => (
-        <li key={index} className="queue-item">
-          {/* Display song image dynamically */}
-          <img 
-            src={track.track_img_url || 'https://placeholder.com/150'} // Use dynamic image URL
-            alt={track.track_name}
-            className="track-image"
-          />
-          <div className="track-info">
-            {/* Display song name dynamically */}
-            <span className="track-name">{track.track_name}</span>
-            {/* Display artist name dynamically */}
-            <span className="artist-name">{track.track_artist_name}</span>
-          </div>
-        </li>
-      ))
-    ) : (
-      <p className="no-songs">No songs in the queue</p>
-    )}
-  </ul>
-</div>
+          
+          {queue.filter(track => track.id !== -1).length > 0 ? (
+            queue.filter(track => track.id !== -1) // Filter out tracks with id -1
+            .map((track, index) => (
+              <ul className="queue-list">
+              <li key={index} className="queue-item">
+                {/* Display song image dynamically */}
+                <img 
+                  src={track.track_img_url || 'https://placeholder.com/150'} // Use dynamic image URL
+                  alt={track.track_name}
+                  className="track-image"
+                />
+                <div className="track-info">
+                  {/* Display song name dynamically */}
+                  <span className="track-name">{track.track_name}</span>
+                  {/* Display artist name dynamically */}
+                  <span className="artist-name">{track.track_artist_name}</span>
+                  <br></br>
+                  <span className="">({track.id === 0 ? 'Table Admin' : `Table ${track.id}`})</span>
+                </div>
+              </li>
+              </ul>
+            ))
+          ) : (
+            <div className='onGoingAnime'>
+            <DotLottieReact
+            src="https://lottie.host/a0d581e7-256b-46b2-be5e-b904b0374ac4/vXfOn9S2Ef.lottie"
+            loop
+            autoplay/> 
+            </div>
+            )}
+        
+      </div>  
+
 
       {/* Current Song Section */}
   <div className="current-song-section">
-    <h3>Now Playing</h3>
     <div className="current-song-info">
+    <h3>Now Playing</h3>
       {/* Display the album art dynamically */}
       <img src={track_img_url || 'https://placeholder.com/150'} alt="Album Art" />
       <div className="current-song-details">
         {/* Display the current song name dynamically */}
-        <p className="song-title">{songName || 'Song Title'}</p>
+        <p className="table-song-title">{songName || 'Song Title'} by {track_artist_name || 'Artist Name'}</p>
         {/* Display the artist name dynamically */}
         <p className="artist-name">{track_artist_name || 'Artist Name'}</p>
       </div>

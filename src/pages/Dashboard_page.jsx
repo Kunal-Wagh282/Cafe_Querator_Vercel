@@ -5,11 +5,13 @@ import '../styles/Dashboard.css'; // Add your styles here
 import CONFIG from '../config'; // Import the API URL
 import Preloader from '../components/Prealoader';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlay, faPause, faForward ,faBackward} from "@fortawesome/free-solid-svg-icons";
+import { faPlay, faPause, faForward ,faBackward,faCog} from "@fortawesome/free-solid-svg-icons";
 import tableImage from '../images/table.png';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';  // Import Toastify CSS
 import SpotifyPlayerWithProgress from '../components/SpotifyPlayerWithProgress';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+
 const Dashboard = () => {
   // State variables
   // Authentication and Tokens
@@ -856,12 +858,14 @@ const playSong = async (track_id,nowSongname) => {
         {loading ? (
         <Preloader /> // Show the preloader
       ) : (<></>)}
-      {/* <header className="dashboard-header">
+      <header className="dashboard-header">
         <div className="heading">
             <h1>Welcome {cafeInfo ? cafeInfo.Cafe_Name : 'Cafe'} to Cafe-Qurator</h1>
             Let's change the vibe today!
+
+          
         </div>
-      </header> */}
+      </header>
       <ToastContainer />
 
       <div className="dashboard-content">
@@ -875,44 +879,68 @@ const playSong = async (track_id,nowSongname) => {
             onClick={playNextSong}
             disabled={isButtonDisabled}
             style={{
-              backgroundColor: isButtonDisabled ? '#F5F5DC' : '#F5F5DC', // Change color when disabled
+              backgroundColor: isButtonDisabled ? '#F5F5DC' : '', // Change color when disabled
               color: isButtonDisabled ? '#a1a1a1' : 'black', // Text color when disabled
-              cursor: isButtonDisabled ? 'not-allowed' : 'pointer', // Change cursor when disabled
+              cursor: isButtonDisabled ? 'not-allowed' : 'pointer', // Change cursor when disabled 
             }}>
             Start Vibe
           </button>
           <button className="sidebar-btn" onClick={handleLogout}>Logout</button>
           </div>
+            <div className="queue">
+                                      <h3>Requested Songs:</h3>
+                            {/* <div className="requested-queue-section"> */}
+                              
+                                <ul className='queue-list'>          
+                                {requestedSongs.length > 0 ? (
+                                  requestedSongs.map((selectedTrack, index) => (
+                                    <li key={index} className="queue-item-d">
+                                      {/* Display song image dynamically */}
+                                      <img 
+                                        src={selectedTrack.album.images[0]?.url || 'https://placeholder.com/150'} // Use dynamic image URL
+                                        alt={selectedTrack.name}
+                                        className="song-thumbnail"
+                                      />
+                                      <div className="song-details">
+                                        {/* Display song name dynamically */}
+                                        <span className="queue-song-title">{selectedTrack.name}</span>
+                                        {/* Display artist name dynamically */}
+                                        {/* <span className="song-artist">{selectedTrack.album.artists[0]?.name || 'Unknown Artist'}</span> */}
+                                        
+                                        <br />
+                                        {/* <span className="song-origin">
+                                          ({track.id === 0 ? 'Table Admin' : `Table ${track.id}`})
+                                        </span> */}
+                                      </div>
+                                      <div className="action-buttons">
+                                        <button 
+                                          className="accept-btn" 
+                                          onClick={() => handleAccept(selectedTrack.name)}
+                                        >
+                                          ✔
+                                        </button>
+                                        <button 
+                                          className="deny-btn" 
+                                          onClick={() => handleRemove(selectedTrack.name)}
+                                        >
+                                          X
+                                        </button>
+                                      </div>
+                                    </li>
+                                  ))
+                                ) : (
+                                  <p className="no-rejected-songs"> <DotLottieReact
+                                  src="https://lottie.host/a7229df5-e716-40f8-8295-6cda65243cf1/0BDBYmOiMO.lottie"
+                                  loop
+                                  autoplay/> </p>
+                                )}
+                              </ul>
+                            
+                            {/* </div> */}
+        </div> 
+
+
           
-          <input  
-            type = "text"
-            placeholder = "search your playlist"
-            value = {playlistQuery}
-            onChange = {handlePlaylistInputChange}
-          />
-          
-
-          {playlistSuggestions.length > 0 && (
-              <div className="playlist-suggestions">
-                <ul>
-                  {playlistSuggestions.map((playlist) => (
-                    <li key={playlist.id} onClick={() => handlePlaylistSuggestionClick(playlist)} className="playlist-suggestion-item">
-                      <img 
-                        src={playlist.images[0]?.url || 'https://placeholder.com/150'} // Display album image
-                        alt={playlist.name}
-                        className="playlist-suggestion-image"
-                      />
-                      <div className="playlist-suggestion-text">
-                        <span className="playlist-name">{playlist.name}</span>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              )
-            }
-
-
         </div>
       
        {/* --------------------------this is the main section code----------------------------- */}
@@ -1033,16 +1061,47 @@ const playSong = async (track_id,nowSongname) => {
 
 
         <div className="queue-section">
+        <input  
+            type = "text"
+            placeholder = "search your playlist"
+            value = {playlistQuery}
+            onChange = {handlePlaylistInputChange}
+            className='playlist-search'
+          />
+          
+
+          {playlistSuggestions.length > 0 && (
+              <div className="playlist-suggestions">
+                <ul>
+                  {playlistSuggestions.map((playlist) => (
+                    <li key={playlist.id} onClick={() => handlePlaylistSuggestionClick(playlist)} className="playlist-suggestion-item">
+                      <img 
+                        src={playlist.images[0]?.url || 'https://placeholder.com/150'} // Display album image
+                        alt={playlist.name}
+                        className="playlist-suggestion-image"
+                      />
+                      <div className="playlist-suggestion-text">
+                        <span className="playlist-name">{playlist.name}</span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              )
+            }
+
+
           <div>
           <h1>Ongoing Queue</h1>
           </div>
         
           {/* Queue Section */}
             <div className="queue">
-              <ul className="queue-list">
-                {queue.length > 0 ? (
+          
+                {queue.filter(track => track.id !== -1).length > 0 ? (
                   queue.filter(track => track.id !== -1) // Filter out tracks with id -1
                   .map((track, index) => (
+                    <ul className="queue-list">
                     <li key={index} className="queue-item">
                       {/* Display song image dynamically */}
                       <img 
@@ -1059,69 +1118,20 @@ const playSong = async (track_id,nowSongname) => {
                         <span className="">({track.id === 0 ? 'Table Admin' : `Table ${track.id}`})</span>
                       </div>
                     </li>
+                    </ul>
                   ))
                 ) : (
-                  <p className="no-songs">No songs in the queue</p>
-                )}
-              </ul>
-            </div>
-
-
-
-
-            <h2>Rejected Songs:</h2>
-<div className="queue-section">
-<div className="queue">
-  <ul className="queue-list">
-    {requestedSongs.length > 0 ? (
-      requestedSongs.map((selectedTrack, index) => (
-        <li key={index} className="queue-item">
-          {/* Display song image dynamically */}
-          <img 
-            src={selectedTrack.album.images[0]?.url || 'https://placeholder.com/150'} // Use dynamic image URL
-            alt={selectedTrack.name}
-            className="song-thumbnail"
-          />
-          <div className="song-details">
-            {/* Display song name dynamically */}
-            <span className="song-title">{selectedTrack.name}</span>
-            {/* Display artist name dynamically */}
-            {/* <span className="song-artist">{selectedTrack.album.artists[0]?.name || 'Unknown Artist'}</span> */}
-            
-            <br />
-            {/* <span className="song-origin">
-              ({track.id === 0 ? 'Table Admin' : `Table ${track.id}`})
-            </span> */}
-          </div>
-          <div className="action-buttons">
-            <button 
-              className="accept-btn" 
-              onClick={() => handleAccept(selectedTrack.name)}
-            >
-              Accept
-            </button>
-            <button 
-              className="deny-btn" 
-              onClick={() => handleRemove(selectedTrack.name)}
-            >
-              Remove
-            </button>
-          </div>
-        </li>
-      ))
-    ) : (
-      <p className="no-rejected-songs">No rejected songs available</p>
-    )}
-  </ul>
+                  <div className='onGoingAnime'>
+                  <DotLottieReact
+                  src="https://lottie.host/a0d581e7-256b-46b2-be5e-b904b0374ac4/vXfOn9S2Ef.lottie"
+                  loop
+                  autoplay/> 
+                  </div>
+                  )}
+              
+            </div>           
+</div>   
 </div>
-</div>
-
-
-
-
-
-          </div>   
-      </div>
 
 
       {/* Current Song Section */}
