@@ -71,7 +71,8 @@ const Table = () => {
           fetchQueue();
         }
         if (event.data === 'current track updated') {
-          //fetchQueue();
+          updateCurrentSong();
+          console.log("Change song")
         }
         
       };
@@ -101,6 +102,21 @@ const Table = () => {
     return () => clearTimeout(timeoutId);
   }, []);
 
+  const updateCurrentSong = async () => {
+    try {
+      const response = await axios.get(`${CONFIG.API_URL}/current-track`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('cjwt')}`,
+        },
+      });
+      console.log(response)
+      if(response.status === 200){
+      
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
 
     
   const fetchToken = async () => {
