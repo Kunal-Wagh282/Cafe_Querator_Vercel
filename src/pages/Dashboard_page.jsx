@@ -873,7 +873,7 @@ const playSong = async (track_id,nowSongname) => {
           <div className='sidebar-elements'>
           <h1>Dashboard</h1>
           <button className="sidebar-btn" >Home</button>
-          <button className="sidebar-btn" onClick={getQRcode} >Table QR</button>
+          <button className="sidebar-btn" onClick={getQRcode} >Get Table QR</button>
           <button
             className="sidebar-btn"
             onClick={playNextSong}
