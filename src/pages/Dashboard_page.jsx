@@ -127,8 +127,14 @@ const Dashboard = () => {
         }
         if (event.data.startsWith('Table') && event.data.includes('Turned On')) {
           const tableNumber = event.data.split(' ')[1];  // Extract table number
+          if(tableColors.tableNumber === "green"){
+            coonsole.log("Table Already on!");
+            
+          }
+          else{
           notify('info',`Table ${tableNumber} status on!!`)
           updateTables();  // Update the specific table
+          }
         }
       };
 
@@ -764,6 +770,7 @@ const playSong = async (track_id,nowSongname) => {
             
             setTableColors((prevColors) => {
               if (prevColors[table] === 'green') {
+                
                 return { ...prevColors, [table]: 'red' }; // Optimistically update to red
               }
               console.log("Table is already red, no API call will be made.");
