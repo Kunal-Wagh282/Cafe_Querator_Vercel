@@ -46,22 +46,17 @@ const Table = () => {
   useEffect(() => {
     // Fetch JWT token once the component mounts
     setJwtToken()
-    .then(() => {
-      fetchToken()
+    .then(() =>{
+      fetchQueue()
       .then(() => {
-        updateCurrentSong()
+        fetchToken()
+        .then(() => {
+          updateCurrentSong()
+        })
       })
-    }) // Call the token fetch function
+      })
   }, [tableid]); // Re-run if cafeId changes
 
-  useEffect(() => {
-    fetchQueue();
-  }, []);
-  
-
-  
-
-  
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -118,7 +113,7 @@ const Table = () => {
   }, []);
 
   const updateCurrentSong = async () => {
-    const token = localStorage.getItem("access_token")
+    
     try {
       const response = await axios.get(`${CONFIG.QUEUE_URL}/current-track`, {
         headers: {
@@ -126,19 +121,29 @@ const Table = () => {
         },
       });
       if(response.status === 200){
-        const data = response.data.current_track        
-      const results = await searchSongs(data.track_name,token); // Await results
-      const selectedTrack = results[0];
-      setSongname(selectedTrack.name);
-      setTrack_Artist_Name(selectedTrack.artists[0]?.name || 'Unknown Artist');
-      setTrack_Image_Url(selectedTrack.album?.images[0]?.url || 'https://placeholder.com/150');
+        const accessToken = localStorage.getItem("access_token") 
+        
+        const endpoint = `https://api.spotify.com/v1/tracks/${response.data.current_track.track_id}`;
+        try {
+          const response = await axios.get(endpoint, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          });
+        const selectedTrack = response.data;
+       
+        setSongname(selectedTrack.name);
+        setTrack_Artist_Name(selectedTrack.artists[0]?.name || 'Unknown Artist');
+        setTrack_Image_Url(selectedTrack.album?.images[0]?.url || 'https://placeholder.com/150');
+        }
+        catch (error) {
+          console.error('Error fetching song features or playing the song:', error);
+        }
       }
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
-
-  
 
     
   const fetchToken = async () => {
@@ -235,6 +240,7 @@ const Table = () => {
           },
         });
         if (response.status === 200) {
+          console.log(response.data.Queue)
           setQueue(response.data.Queue); // Assuming the backend response contains a 'queue' array
         }
       } catch (error) {
@@ -408,7 +414,7 @@ const Table = () => {
           {queue.filter(track => track.id !== -1).length > 0 ? (
             queue.filter(track => track.id !== -1) // Filter out tracks with id -1
             .map((track, index) => (
-              <ul className="queue-list">
+              <ul key={index} className="queue-list">
               <li key={index} className="queue-item">
                 {/* Display song image dynamically */}
                 <img 

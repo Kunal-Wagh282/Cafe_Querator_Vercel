@@ -127,14 +127,9 @@ const Dashboard = () => {
         }
         if (event.data.startsWith('Table') && event.data.includes('Turned On')) {
           const tableNumber = event.data.split(' ')[1];  // Extract table number
-          if(tableColors.tableNumber === "green"){
-            coonsole.log("Table Already on!");
-            
-          }
-          else{
+          // alert(`Table ${tableNumber} status on!!`)
           notify('info',`Table ${tableNumber} status on!!`)
           updateTables();  // Update the specific table
-          }
         }
       };
 
@@ -190,9 +185,9 @@ const Dashboard = () => {
       if (response.status === 200 && response.data.Next_track) 
       {
         const data = response.data.Next_track;
-        //console.log(data.track_id);
+        //console.log(data);
         // Play the next track
-        playSong(data.track_id,data.track_name); // Call your existing playSong function
+        playSong(data); // Call your existing playSong function
 
         // If needed, send a POST request to notify the backend that the track has been played
         
@@ -462,7 +457,7 @@ const Dashboard = () => {
   const searchSongs = async (query) => {
     const accessToken = localStorage.getItem("access_token")
 
-
+    
     if (!accessToken) return [];
     const endpoint = `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=10`;
 
@@ -480,33 +475,33 @@ const Dashboard = () => {
   };
 
 // Function to fetch song features by track ID
-const playSong = async (track_id,nowSongname) => {
+const playSong = async (nowTrack) => {
+  const accessToken = localStorage.getItem("access_token")
   if (!accessToken) return null;
 
-  const endpoint = `https://api.spotify.com/v1/audio-features/${track_id}`;
-  try {
-    // Fetch song audio features
+  const endpoint = `https://api.spotify.com/v1/tracks/${nowTrack.track_id}`;
+ try {
+
     const response = await axios.get(endpoint, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
     });
-    //console.log(response.data)
-    const results = await searchSongs(nowSongname);
-    const selectedTrack = results[0]; // Assuming the first result is what the user meant
-    setSongname(selectedTrack.name);
-    setTrack_Artist_Name(selectedTrack.artists[0]?.name || 'Unknown Artist');
-    setTrackid(selectedTrack.id);
-    setTrack_Image_Url(selectedTrack.album?.images[0]?.url || 'https://placeholder.com/150');
+  
+     const selectedTrack = response.data; // Assuming the first result is what the user meant
+     setSongname(selectedTrack.name);
+     setTrack_Artist_Name(selectedTrack.artists[0]?.name || 'Unknown Artist');
+     setTrackid(selectedTrack.id);
+     setTrack_Image_Url(selectedTrack.album?.images[0]?.url || 'https://placeholder.com/150');
 
-    const songUri = response.data.uri; // Get the song URI from the response
+    // const songUri = response.data.uri; // Get the song URI from the response
     const deviceId=localStorage.getItem("device_id");
     if(deviceId){
     // Play the song using the URI
-    await axios.put(
+    const response= await axios.put(
       `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
       {
-        uris: [songUri], // URI of the song to play
+        uris: [`spotify:track:${nowTrack.track_id}`], // URI of the song to play
       },
       {
         headers: {
@@ -516,17 +511,13 @@ const playSong = async (track_id,nowSongname) => {
       }
       
     );
-    console.log('Playing song with URI:', songUri);
+    console.log('Playing song:',nowTrack.track_name);
     }
     else{
       console.log("Device ID not found")
     }
-
-
-
-    
-
-  } catch (error) {
+  }
+    catch (error) {
     console.error('Error fetching song features or playing the song:', error);
     return null; // Return null on error
   }
@@ -535,12 +526,8 @@ const playSong = async (track_id,nowSongname) => {
 
 
   // Handle search form submission
-  const handleSearchSubmit = async (searchQuery) => {
-    if (searchQuery) {
-      const results = await searchSongs(searchQuery);
-      if (results.length > 0) {
-        const selectedTrack = results[0]; // Assuming the first result is what the user meant
-  
+  const handleSearchSubmit = async (selectedTrack) => {
+    if (selectedTrack) {
         try {
           const response = await axios.post(`${CONFIG.QUEUE_URL}/add-track`,
             {
@@ -569,7 +556,7 @@ const playSong = async (track_id,nowSongname) => {
 
         }
        
-      }
+      
     }
   };
   
@@ -595,6 +582,7 @@ const playSong = async (track_id,nowSongname) => {
 
 
   const handleSuggestionClick = (track) => {
+    //console.log(track)
     // Set the input value to the selected track's name
     setSearchQuery('');
   
@@ -603,7 +591,7 @@ const playSong = async (track_id,nowSongname) => {
   
     // Optionally, clear the search results if you are displaying them somewhere else
     setSearchResults([]);
-    handleSearchSubmit(track.name);
+    handleSearchSubmit(track);
   };
   
  
@@ -674,13 +662,15 @@ const playSong = async (track_id,nowSongname) => {
 
 
   const fetchPlaylistSuggestions = async (query) => {
+
     if (!query) {
       setPlaylistSuggestions([]);
       return;
     }
   
-    const results = await searchPlaylists(query);
+    const results = await searchPlaylists(query); 
     setPlaylistSuggestions(results);
+    
   };
   
   // fetching hte features of the playlists 
@@ -770,7 +760,6 @@ const playSong = async (track_id,nowSongname) => {
             
             setTableColors((prevColors) => {
               if (prevColors[table] === 'green') {
-                
                 return { ...prevColors, [table]: 'red' }; // Optimistically update to red
               }
               console.log("Table is already red, no API call will be made.");
@@ -936,10 +925,10 @@ const playSong = async (track_id,nowSongname) => {
                                     </li>
                                   ))
                                 ) : (
-                                  <p className="no-rejected-songs"> <DotLottieReact
+                                  <div className="no-rejected-songs"> <DotLottieReact
                                   src="https://lottie.host/a7229df5-e716-40f8-8295-6cda65243cf1/0BDBYmOiMO.lottie"
                                   loop
-                                  autoplay/> </p>
+                                  autoplay/> </div>
                                 )}
                               </ul>
                             
@@ -1080,7 +1069,8 @@ const playSong = async (track_id,nowSongname) => {
           {playlistSuggestions.length > 0 && (
               <div className="playlist-suggestions">
                 <ul>
-                  {playlistSuggestions.map((playlist) => (
+                  {playlistSuggestions.filter((playlist) => playlist !== null)
+                  .map((playlist) => (
                     <li key={playlist.id} onClick={() => handlePlaylistSuggestionClick(playlist)} className="playlist-suggestion-item">
                       <img 
                         src={playlist.images[0]?.url || 'https://placeholder.com/150'} // Display album image
@@ -1104,11 +1094,10 @@ const playSong = async (track_id,nowSongname) => {
         
           {/* Queue Section */}
             <div className="queue">
-          
                 {queue.filter(track => track.id !== -1).length > 0 ? (
                   queue.filter(track => track.id !== -1) // Filter out tracks with id -1
                   .map((track, index) => (
-                    <ul className="queue-list">
+                    <ul key={index} className="queue-list">
                     <li key={index} className="queue-item">
                       {/* Display song image dynamically */}
                       <img 
