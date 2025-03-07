@@ -1,16 +1,17 @@
-// const CONFIG = {
-//     API_URL: 'https://cafequerator-backend.onrender.com/api',
-//     CUSTOMER_URL: 'https://cafequerator-backend.onrender.com/customer/api',
-//     QUEUE_URL: 'https://cafequerator-backend.onrender.com/managequeue',
-//   };
-
-
 const CONFIG = {
-  API_URL: 'https://cafequeuerator.duckdns.org/api',
-  CUSTOMER_URL: 'https://cafequeuerator.duckdns.org/customer/api',
-  QUEUE_URL: 'https://cafequeuerator.duckdns.org/managequeue',
-  WEBSOCKET_URL: 'wss://cafequeuerator.duckdns.org/ws/queue'
-  };
+    API_URL: 'https://cafequerator-backend.onrender.com/api',
+    CUSTOMER_URL: 'https://cafequerator-backend.onrender.com/customer/api',
+    QUEUE_URL: 'https://cafequerator-backend.onrender.com/managequeue',
+    WEBSOCKET_URL: 'wss://cafequeuerator-backend.onrender.com/ws/queue'  
+  };
+
+
+// const CONFIG = {
+//   API_URL: 'https://cafequeuerator.duckdns.org/api',
+//   CUSTOMER_URL: 'https://cafequeuerator.duckdns.org/customer/api',
+//   QUEUE_URL: 'https://cafequeuerator.duckdns.org/managequeue',
+//   WEBSOCKET_URL: 'wss://cafequeuerator.duckdns.org/ws/queue'
+//   };
 
 
   // const CONFIG = {
